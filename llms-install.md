@@ -1,31 +1,47 @@
-# Cline installation and verification guide
+# MCP client setup / MCP-Client-Einrichtung
 
-This file intentionally avoids inventing a network endpoint or authentication scheme.
+## 🇩🇪 Deutsch
 
-## Prerequisites to verify
+Der **öffentliche Alle-Provider-MCP-Server** ist ein Remote-Endpunkt. Für die Nutzung seiner veröffentlichten Verzeichnisdaten muss kein WordPress-Server lokal installiert werden.
 
-- Identify the live MCP protocol endpoint and supported transport (Streamable HTTP, SSE, or another documented method).
-- Verify TLS, authorization requirements, and whether access is read-only or includes mutations.
-- Confirm that the server actually responds to MCP client initialization and tool discovery.
-- Confirm the exact configuration format for the intended Cline release.
+- **Endpunkt:** `https://www.alle-provider.de/wp-json/alle-provider-mcp/v1/mcp`
+- **Transport laut Betreiber-Dokumentation:** HTTPS, JSON-RPC 2.0 per POST
+- **Dokumentierte Protokollversion:** `2025-06-18`
+- **Unterstützte Methoden:** `initialize`, `ping`, `tools/list`, `tools/call`
 
-## Setup procedure
+### Erste Verbindung testen
 
-1. Open https://www.alle-provider.de/mcp-schnittstelle/.
-2. Locate the **MCP transport URL**, not the page address.
-3. Configure the endpoint in Cline using its supported remote MCP server mechanism. If the service requires credentials, use Cline's secure configuration and do not commit them here.
-4. Connect and verify MCP initialization, capability negotiation, and the list of tools.
-5. Execute a harmless, read-only search with a limited result set.
-6. Record tested Cline version, test date, transport, and result in this repository.
-7. Only after a successful repeatable test, add a real copy-and-paste setup snippet to README.md.
+```bash
+curl -X POST 'https://www.alle-provider.de/wp-json/alle-provider-mcp/v1/mcp' \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -H 'MCP-Protocol-Version: 2025-06-18' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"alle-provider-test","version":"1.0"}}}'
+```
 
-## Acceptance checklist
+Weitere Werkzeuge abrufen:
 
-- [ ] Actual endpoint and transport documented
-- [ ] Authentication / authorization documented
-- [ ] Successful setup from README.md or this guide independently observed
-- [ ] Read-only operation smoke test passed
-- [ ] Timeouts, rate limits and error handling checked
-- [ ] 400x400 PNG repository icon available for Cline submission
+```bash
+curl -X POST 'https://www.alle-provider.de/wp-json/alle-provider-mcp/v1/mcp' \
+  -H 'Content-Type: application/json' \
+  --data '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+```
 
-The checklist is intentionally unchecked until evidence is available.
+**Cline:** Trage die obige Endpunktadresse nur in einer Cline-Version ein, die den dokumentierten Remote-HTTP-MCP-Transport unterstützt. Prüfe beim Verbindungsaufbau `initialize` und `tools/list`. Ein Cline-Ein-Klick-Setup wurde noch nicht nachgewiesen; daher wird keine unbestätigte JSON-Konfiguration als garantiert funktionierend ausgegeben.
+
+Die Werkzeuge `find_terms`, `search_listings` und `get_listing` sind öffentlich dokumentiert. `register_account` erfordert Datenschutz-Zustimmung und versendet einen Bestätigungslink. `submit_listing` benötigt eine persönliche WordPress-Anwendungspasswort-Authentifizierung und ausdrückliche Zustimmungen; Einreichungen werden moderiert.
+
+## 🇬🇧 English
+
+The public Alle-Provider MCP service is a **remote endpoint**. No local WordPress installation is needed to browse published directory data.
+
+- **Endpoint:** `https://www.alle-provider.de/wp-json/alle-provider-mcp/v1/mcp`
+- **Documented transport:** HTTPS, JSON-RPC 2.0 over POST
+- **Documented protocol version:** `2025-06-18`
+- **Methods:** `initialize`, `ping`, `tools/list`, `tools/call`
+
+Run the initialization and tools/list examples above to verify protocol interoperability. In Cline, configure the URL only if your client version supports this remote MCP transport. No verified one-click Cline installation is claimed.
+
+The public tools are `find_terms`, `search_listings`, and `get_listing`. Account registration requires privacy consent and email confirmation. Submitting a listing requires an individual WordPress application password, explicit consent, and editorial review.
+
+**Source of interface details / Quelle:** https://www.alle-provider.de/mcp-schnittstelle/
