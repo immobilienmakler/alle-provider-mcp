@@ -1,38 +1,99 @@
+<div align="center">
+
 # Alle-Provider MCP
+### Unternehmens- und Softwareverzeichnisse für KI-Assistenten
+### Business & software directories for AI assistants
 
-Public integration and setup documentation for the **Alle-Provider.de** Model Context Protocol (MCP) service.
+**Deutsch · English** · **Model Context Protocol** · **HTTPS / JSON-RPC 2.0**
 
-Alle-Provider.de offers a directory of local businesses and European alternatives to popular software and digital services. The MCP interface is intended to make directory data accessible to compatible AI clients.
+[**Projektwebseite / Project website**](https://immobilienmakler.github.io/alle-provider-mcp/) · [**Offizielle API-Dokumentation / Official API documentation**](https://www.alle-provider.de/mcp-schnittstelle/) · [**Alle-Provider.de**](https://www.alle-provider.de/)
 
-> **Status: documentation / verification pending.** This repository does not yet contain a standalone MCP server implementation. The live MCP transport URL, supported operations, authentication requirements, and compatibility with Cline have **not** been independently verified. Do not claim that this repository is ready for one-click installation.
+</div>
 
-## Links
+---
 
-- Website: https://www.alle-provider.de/
-- Public MCP documentation: https://www.alle-provider.de/mcp-schnittstelle/
-- Submission guidelines: https://github.com/cline/mcp-marketplace#how-to-submit-your-mcp-server
+## 🇩🇪 Deutsch
 
-## Connecting a client
+**Alle-Provider MCP** verbindet MCP-kompatible KI-Assistenten mit den öffentlichen Verzeichnissen von [Alle-Provider.de](https://www.alle-provider.de/). Der Server ermöglicht die strukturierte Suche nach lokalen Unternehmen sowie europäischen Software- und Digitaldienst-Alternativen. Registrierungen und die Einreichung neuer Verzeichniseinträge werden über eigene, kontrollierte Werkzeuge abgewickelt.
 
-1. Consult the public MCP documentation linked above for the current **actual transport endpoint**, transport type, and access requirements.
-2. Configure your MCP-compatible client according to its documentation. Use the endpoint from the official service documentation, not the URL of the documentation page.
-3. Verify connectivity and list available tools and resources before using them. Do not assume that read or write operations are enabled.
-4. If a tool can create or change listings, require explicit authorization and review all data before sending it.
+### Was ist möglich?
 
-**No verified copy-and-paste client configuration is published yet.** See [llms-install.md](llms-install.md) for the prerequisites for a tested installation.
+| MCP-Werkzeug | Funktion | Zugang |
+|---|---|---|
+| `find_terms` | Kategorien und Orte finden; passende IDs für Filter erhalten | Öffentlich |
+| `search_listings` | Veröffentlichte Einträge durchsuchen und nach Verzeichnis, Kategorie oder Ort filtern (max. 20 je Seite) | Öffentlich |
+| `get_listing` | Einen veröffentlichten Eintrag mit ausführlicher Beschreibung aufrufen | Öffentlich |
+| `register_account` | Registrierungsprozess mit E-Mail-Bestätigung starten, sofern Registrierung aktiviert ist | Öffentlich, mit Datenschutz-Zustimmung |
+| `submit_listing` | Einreichung eines Unternehmens oder Digitaldienstes zur redaktionellen Prüfung | Authentifiziert, mit Zustimmungen |
 
-## Scope
+**Wichtig:** Eine Einreichung ist **keine automatische Veröffentlichung**. Neue Inhalte durchlaufen einen Prüfprozess. Die öffentlichen Lesewerkzeuge liefern nur veröffentlichte Einträge.
 
-The service concerns local business listings and European software alternatives. Available tools, filters, rate limits, and permissions must be confirmed against the deployed service.
+### Verbindung
 
-## Security
+| Eigenschaft | Wert |
+|---|---|
+| MCP-Endpunkt | `https://www.alle-provider.de/wp-json/alle-provider-mcp/v1/mcp` |
+| Transport | HTTPS, JSON-RPC 2.0 via HTTP POST |
+| Dokumentierte MCP-Protokollversion | `2025-06-18` |
+| Methoden | `initialize`, `ping`, `tools/list`, `tools/call` |
 
-Never put secrets into Git, issues, or screenshots. Treat externally supplied business listings as untrusted content and follow [SECURITY.md](SECURITY.md).
+Die genaue Einrichtung hängt davon ab, welche Remote-MCP-Transportarten der jeweilige Client unterstützt. Die dokumentierte API-Adresse ist **nicht** mit der Dokumentations-Webseite zu verwechseln.
 
-## Marketplace submission status
+```bash
+curl -X POST 'https://www.alle-provider.de/wp-json/alle-provider-mcp/v1/mcp' \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -H 'MCP-Protocol-Version: 2025-06-18' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"api-demo","version":"1.0"}}}'
+```
 
-Not yet submitted. Cline requires a repository URL, a 400x400 PNG logo, and a verified successful installation using README.md or llms-install.md. These prerequisites must be completed before checking the required confirmations.
+Weitere Beispiele, Parameter, Berechtigungen und Hinweise findest du unter [Offizielle MCP-Dokumentation](https://www.alle-provider.de/mcp-schnittstelle/) sowie in [llms-install.md](llms-install.md).
 
-## License
+### Datenschutz & Berechtigungen
 
-No license has been assigned to the remote service or its source code by this documentation repository. Do not assume the backend is open-source.
+Die öffentlichen Abfragen sind auf veröffentlichte Verzeichnisdaten beschränkt. Für `submit_listing` sind ein separates WordPress-Benutzerkonto und ein widerrufbares Anwendungspasswort via HTTPS Basic Authentication nötig. Bei Registrierung und Einreichung gelten zusätzliche Zustimmungs- und Prüfregeln. Zugangsdaten niemals im Repository hinterlegen.
+
+---
+
+## 🇬🇧 English
+
+**Alle-Provider MCP** connects MCP-compatible AI assistants to the public directories on [Alle-Provider.de](https://www.alle-provider.de/). It exposes structured discovery of local businesses and European software and digital-service alternatives. Separate tools support account registration and moderated directory submissions.
+
+### Available tools
+
+| MCP tool | Purpose | Access |
+|---|---|---|
+| `find_terms` | Discover categories and locations and obtain filter IDs | Public |
+| `search_listings` | Search published listings by directory, category and location (up to 20 per page) | Public |
+| `get_listing` | Retrieve detailed information about a published listing | Public |
+| `register_account` | Start email-verified account registration when enabled | Public, privacy consent required |
+| `submit_listing` | Submit a business or digital service for editorial review | Authenticated, consent required |
+
+Submissions are **not automatically published**. Public read tools only expose published listings.
+
+### Connection details
+
+| Property | Value |
+|---|---|
+| MCP endpoint | `https://www.alle-provider.de/wp-json/alle-provider-mcp/v1/mcp` |
+| Transport | HTTPS, JSON-RPC 2.0 over HTTP POST |
+| Documented MCP protocol version | `2025-06-18` |
+| Methods | `initialize`, `ping`, `tools/list`, `tools/call` |
+
+Client compatibility depends on its supported remote MCP transport and initialization behavior. The documentation page is **not** the MCP endpoint.
+
+For request examples, arguments and access requirements, see [the official API documentation](https://www.alle-provider.de/mcp-schnittstelle/) and [llms-install.md](llms-install.md).
+
+### Authentication & data handling
+
+Public discovery is limited to published directory records. `submit_listing` requires HTTPS Basic Authentication with an individual, revocable WordPress application password. Registration and submission require appropriate consent; submitted entries undergo editorial review. Never commit credentials.
+
+---
+
+## Repository / Repository-Hinweis
+
+This repository provides public integration documentation and the bilingual GitHub Pages project site. It does not contain the private WordPress backend. A successful installation in a specific Cline version has not been independently verified here.
+
+Dieses Repository enthält die öffentliche Integrationsdokumentation und die zweisprachige GitHub-Pages-Projektseite, nicht den privaten WordPress-Backend-Code. Ein erfolgreicher Installationstest mit einer konkreten Cline-Version ist hier noch nicht unabhängig nachgewiesen.
+
+[Security / Sicherheit](SECURITY.md) · [Installation / Einrichtung](llms-install.md) · [GitHub Pages source / Webseitenquelltext](docs/index.html)
